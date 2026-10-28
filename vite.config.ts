@@ -57,9 +57,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   // Populate process.env so serverless handlers have access to RESEND_API_KEY
   for (const [key, val] of Object.entries(env)) {
-    if (!process.env[key]) {
-      process.env[key] = val;
-    }
+    process.env[key] = val;
   }
 
   return {
