@@ -1,9 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
 
-// Hardcoded verified recipient email address
-const RECIPIENT_EMAIL = 'krupitpatel7kp@gmail.com';
-
 // Simple HTML entity escaping to prevent any script or tag injection in HTML email clients
 function escapeHtml(str: string): string {
   return str
@@ -105,6 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 6. Initialize Resend client
     const resend = new Resend(apiKey);
     const fromAddress = process.env.RESEND_FROM_EMAIL || 'CLICK FRAME CINEMATIC <onboarding@resend.dev>';
+    const recipientEmail = process.env.RESEND_TO_EMAIL || 'krupitpatel7kp@gmail.com';
 
     // 7. Render clean, safe HTML email
     const safeName = escapeHtml(cleanName);
@@ -205,7 +203,7 @@ Reply directly to this email to respond to ${cleanName} (${cleanEmail}).
     // 8. Dispatch email via Resend
     const { data, error } = await resend.emails.send({
       from: fromAddress,
-      to: [RECIPIENT_EMAIL],
+      to: [recipientEmail],
       replyTo: cleanEmail,
       subject: `New Portfolio Inquiry — CLICK FRAME CINEMATIC: ${cleanProject}`,
       html: htmlBody,
@@ -226,7 +224,7 @@ Reply directly to this email to respond to ${cleanName} (${cleanEmail}).
     console.log('[Contact Inquiry Sent Successfully]', {
       id: data?.id,
       timestamp: new Date().toISOString(),
-      recipient: RECIPIENT_EMAIL,
+      recipient: recipientEmail,
     });
 
     // 9. Return verified success
