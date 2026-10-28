@@ -128,18 +128,52 @@ npm run preview
 
 ---
 
+## 📧 Automatic Email Delivery Configuration (Resend)
+
+The contact form sends inquiries directly to `krupitpatel7kp@gmail.com` via a secure server-side Vercel serverless function (`/api/contact`).
+
+### Steps to Enable Real Inbox Delivery:
+
+1. **Create a Free Resend Account:**
+   * Go to [resend.com/signup](https://resend.com/signup) and create a free account (100 free emails/day, 3,000/month).
+2. **Generate an API Key:**
+   * In your Resend dashboard, navigate to **API Keys** → **Create API Key**.
+   * Name: `Click Frame Portfolio`
+   * Permissions: `Full access`
+   * Copy the generated key (starts with `re_...`).
+3. **Add to Vercel Project Settings:**
+   * Open your project dashboard on [vercel.com](https://vercel.com).
+   * Go to **Settings** → **Environment Variables**.
+   * Add the following variable:
+     * **Key:** `RESEND_API_KEY`
+     * **Value:** `re_your_api_key_here`
+     * **Environments:** Check `Production`, `Preview`, and `Development`.
+   * Click **Save** and trigger a redeployment (or push a new commit).
+4. **Local Testing:**
+   * Create a `.env.local` file in the project root:
+     ```env
+     RESEND_API_KEY=re_your_api_key_here
+     ```
+   * Start your local server: `npm run dev`. Submissions will now be delivered to your inbox in real time!
+5. **(Optional) Custom Domain Verification:**
+   * By default, emails are dispatched from `CLICK FRAME CINEMATIC <onboarding@resend.dev>`.
+   * If you have a custom domain (e.g. `clickframecinematic.com`), verify it in Resend (**Domains** → **Add Domain**), add the DNS records, and set `RESEND_FROM_EMAIL='Krupit Patel <inquiries@clickframecinematic.com>'` in Vercel Environment Variables.
+
+---
+
 ## 🌐 1-Click Vercel Deployment
 
-The project includes a ready-to-deploy `vercel.json` configured with SPA routing rewrites and high-performance video streaming cache headers:
+The project includes a ready-to-deploy `vercel.json` configured with serverless function routing and video streaming cache headers:
 
 1. Push your repository to **GitHub**.
 2. Visit [vercel.com/new](https://vercel.com/new) and log in.
-3. Import your GitHub repository.
+3. Import your GitHub repository (`click-frame-cinematic`).
 4. Settings will automatically detect:
    - **Framework:** `Vite`
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
-5. Click **Deploy**!
+5. In **Environment Variables**, add `RESEND_API_KEY`.
+6. Click **Deploy**!
 
 ---
 

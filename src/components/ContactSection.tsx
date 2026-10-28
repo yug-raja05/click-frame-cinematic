@@ -49,8 +49,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent duplicate submissions
+    if (submissionStatus === 'loading') {
+      return;
+    }
+
     // Check honeypot
     if (formData.botcheck) {
+      setSubmissionStatus('success');
       return;
     }
 
@@ -60,28 +66,31 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setErrorMessage('Please enter a valid email address.');
+      setSubmissionStatus('error');
+      return;
+    }
+
     setSubmissionStatus('loading');
     setErrorMessage('');
 
     try {
-      // Send real email via Web3Forms API to krupitpatel7kp@gmail.com
-      const response = await fetch('https://api.web3forms.com/submit', {
+      // Submit to our secure serverless endpoint
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          access_key: '5f9a65f9-399a-4e56-99b5-c085521b34a6',
-          to_email: PROFILE.contact.email,
-          subject: 'New Portfolio Inquiry — CLICK FRAME CINEMATIC',
-          from_name: formData.name,
-          replyto: formData.email,
-          name: formData.name,
-          email: formData.email,
-          project_type: formData.project,
-          message: formData.message,
-          timestamp: new Date().toLocaleString(),
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          project: formData.project,
+          message: formData.message.trim(),
+          botcheck: formData.botcheck,
         }),
       });
 
@@ -95,6 +104,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
           origin: { y: 0.6 },
           colors: ['#EC4899', '#8B5CF6', '#22D3EE', '#3B82F6'],
         });
+        // Clear form only on verified success
         setFormData({
           name: '',
           email: '',
@@ -103,12 +113,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
           botcheck: '',
         });
       } else {
-        throw new Error(result.message || 'Submission failed');
+        throw new Error(result.message || 'Your message could not be sent. Please try again or contact Krupit through WhatsApp.');
       }
-    } catch (err) {
-      console.warn('Form endpoint fallback:', err);
+    } catch (err: unknown) {
+      console.warn('[Contact Submit Error]:', err);
+      // Preserve form values on error so user doesn't lose input
       setErrorMessage(
-        'Sorry, your message could not be sent automatically. Please contact Krupit directly via WhatsApp (+91 9327808752) or click below to send via your email client.'
+        err instanceof Error && err.message
+          ? err.message
+          : 'Your message could not be sent. Please try again or contact Krupit through WhatsApp.'
       );
       setSubmissionStatus('error');
     }
@@ -370,10 +383,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialService }
                 <div className="mb-6 p-5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-left space-y-2 animate-in fade-in">
                   <div className="flex items-center gap-2 font-bold text-emerald-300">
                     <Check className="w-5 h-5 text-emerald-400" />
-                    <span>Thank you! Your project inquiry has been submitted successfully.</span>
+                    <span>Thank you! Your inquiry has been submitted successfully. Krupit will get back to you soon.</span>
                   </div>
                   <p className="text-xs text-emerald-200/90">
-                    Krupit Patel has received your message and will get back to you shortly. For immediate response, you can also reach out via WhatsApp (+91 9327808752).
+                    Your inquiry has been sent to Krupit Patel's inbox. For urgent questions, you can also reach out directly via WhatsApp (+91 9327808752).
                   </p>
                   <div className="pt-2">
                     <a
